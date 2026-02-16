@@ -1,0 +1,43 @@
+name: API Tarefas CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze Code (CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Inicializa o CodeQL para Java
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java
+
+    # Configura o JDK para o build do Maven
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    # Compila e corre os testes unitários
+    - name: Build and Test with Maven
+      run: mvn -B test --file pom.xml
+
+    # Finaliza a análise do CodeQL (usa o resultado do build acima)
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
